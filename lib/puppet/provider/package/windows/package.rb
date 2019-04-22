@@ -25,6 +25,8 @@ class Puppet::Provider::Package::Windows
       with_key do |key, values|
         name = key.name.match(/^.+\\([^\\]+)$/).captures[0]
 
+        values.each { |k,v| values[k] = sanitize_string(v) }
+
         [MsiPackage, ExePackage].find do |klass|
           if pkg = klass.from_registry(name, values)
             yield pkg
@@ -95,6 +97,12 @@ class Puppet::Provider::Package::Windows
       return values['QuietDisplayName'] if values['QuietDisplayName'] && values['QuietDisplayName'].length > 0
 
       ''
+    end
+
+    def self.sanitize_string(value)
+      return value unless value.instance_of? String
+      return value.scrub.gsub("\u0000", "\uFFFD") if value.respond_to?(:scrub)
+      value.scrub.gsub("\u0000", "\uFFFD")
     end
 
     def initialize(name, version)
