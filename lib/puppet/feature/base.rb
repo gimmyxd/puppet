@@ -29,7 +29,7 @@ Puppet.features.add(:microsoft_windows) do
     # gems
     require 'win32/process'
     require 'win32/dir'
-    require 'win32/service'
+    # require 'win32/service'
     true
   rescue LoadError => err
     #TRANSLATORS "win32-process", "win32-dir", and "win32-service" are program names and should not be translated
