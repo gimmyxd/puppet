@@ -6,6 +6,10 @@ module Puppet
       require 'puppet/acceptance/windows_utils/service.rb'
       require 'puppet/acceptance/windows_utils/package_installer.rb'
 
+      JA_DATE_FORMAT = '%y/%m/%d'.freeze
+      FR_DATE_FORMAT = '%d/%m/%y'.freeze
+      DATE_FORMAT    = '%m/%d/%y'.freeze
+
       def profile_base(agent)
         ruby = Puppet::Acceptance::CommandUtils.ruby_command(agent)
         getbasedir = <<'END'
@@ -25,6 +29,12 @@ END
         execute_powershell_script_on(host, script) do |result|
           assert_match(/True/, result.stdout.strip, msg)
         end
+      end
+
+      def date_format(locale)
+        return JA_DATE_FORMAT if locale == 'ja'
+        return FR_DATE_FORMAT if locale == 'fr'
+        DATE_FORMAT
       end
     end
   end

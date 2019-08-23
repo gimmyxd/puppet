@@ -38,7 +38,8 @@ test_name 'PUP-6569 Puppet should not reset passwords for disabled, expired, or 
     expired_username = random_username
 
     step "Create an expired user account" do
-      date_format = host["locale"] == "ja" ? "%y/%m/%d" : "%m/%d/%y"
+      date_format = date_format(host["locale"])
+
       on(host, "cmd.exe /c net user #{expired_username} /expires:#{(Date.today - 1).strftime(date_format)} /add")
     end
 
