@@ -1754,6 +1754,8 @@ end
   # @return [Puppet::Provider, nil] the default or most suitable provider, or nil if no provider was found
   #
   def self.defaultprovider
+    require 'pry-byebug'
+    binding.pry
     return @defaultprovider if @defaultprovider
 
     suitable = suitableprovider

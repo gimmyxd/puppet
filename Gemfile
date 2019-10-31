@@ -33,6 +33,7 @@ gem "facter", *location_for(ENV['FACTER_LOCATION']) if ENV.has_key?('FACTER_LOCA
 gem "hiera", *location_for(ENV['HIERA_LOCATION']) if ENV.has_key?('HIERA_LOCATION')
 # PUP-7115 - return to a gem dependency in Puppet 5
 # gem "semantic_puppet", *location_for(ENV['SEMANTIC_PUPPET_LOCATION'] || ['>= 0.1.3', '< 2'])
+gem 'pry-byebug'
 
 group(:development, :test) do
   # rake is in .gemspec as a development dependency but cannot
