@@ -5,7 +5,7 @@ require 'thread'
 begin
   require 'rspec'
   require 'rspec/core/formatters/helpers'
-  require 'facter'
+  require 'facter-ng'
 rescue LoadError
   # Don't define the task if we don't have rspec or facter present
 else

@@ -1,5 +1,5 @@
 require 'spec_helper'
-require 'facter'
+require 'facter-ng'
 
 describe "Puppet::Util::Windows::Process", :if => Puppet::Util::Platform.windows?  do
   describe "as an admin" do

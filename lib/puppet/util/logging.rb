@@ -2,7 +2,7 @@
 require 'puppet/util/log'
 require 'puppet/error'
 
-require 'facter'
+require 'facter-ng'
 
 module Puppet::Util
 module Logging

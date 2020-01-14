@@ -1,4 +1,4 @@
-require 'facter'
+require 'facter-ng'
 require 'puppet/util/warnings'
 require 'forwardable'
 require 'etc'

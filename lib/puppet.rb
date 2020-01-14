@@ -9,7 +9,7 @@ Puppet::OLDEST_RECOMMENDED_RUBY_VERSION = '2.3.0'
 # see the bottom of the file for further inclusions
 # Also see the new Vendor support - towards the end
 #
-require 'facter'
+require 'facter-ng'
 require 'puppet/error'
 require 'puppet/util'
 require 'puppet/util/autoload'

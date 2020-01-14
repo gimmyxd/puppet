@@ -2,7 +2,7 @@ require 'puppet/util/tagging'
 require 'puppet/util/classgen'
 require 'puppet/util/psych_support'
 require 'puppet/network/format_support'
-require 'facter'
+require 'facter-ng'
 
 # Pass feedback to the user.  Log levels are modeled after syslog's, and it is
 # expected that that will be the most common log destination.  Supports
