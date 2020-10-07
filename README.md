@@ -1,4 +1,3 @@
-# test
 # Puppet
 
 ![RSpec tests](https://github.com/puppetlabs/puppet/workflows/RSpec%20tests/badge.svg)
