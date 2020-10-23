@@ -428,7 +428,17 @@ module Puppet::Environments
       return if t < @next_expiration && ! @cache.any? {|name, _| @cache_expiration_service.expired?(name.to_sym) }
 
       @cache.each_pair do |name, entry|
-        evict_if_expired(name, entry, t)
+        clear_if_expired(name, entry, t)
+      end
+    end
+
+    # Clear an environment if it is expired.
+    #
+    def clear_if_expired(name, entry, t = Time.now)
+      return unless entry
+
+      if entry.expired?(t) || @cache_expiration_service.expired?(name.to_sym)
+        clear_entry(name, entry)
       end
     end
 
@@ -441,7 +451,7 @@ module Puppet::Environments
     #
     # @!macro loader_get_conf
     def get_conf(name)
-      evict_if_expired(name, @cache[name])
+      clear_if_expired(name, @cache[name])
       @loader.get_conf(name)
     end
 
@@ -461,16 +471,6 @@ module Puppet::Environments
         Entry.new(env)              # Entry that never expires (avoids syscall to get time)
       else
         MRUEntry.new(env, ttl)      # Entry that expires in ttl from when it was last touched
-      end
-    end
-
-    # Evicts the entry if it has expired
-    # Also clears caches in Settings that may prevent the entry from being updated
-    def evict_if_expired(name, entry, t = Time.now)
-      return unless entry
-
-      if entry.expired?(t) || @cache_expiration_service.expired?(name.to_sym)
-        clear_entry(name, entry)
       end
     end
 
