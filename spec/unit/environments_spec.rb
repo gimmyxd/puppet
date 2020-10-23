@@ -662,10 +662,7 @@ config_version=$vardir/random/scripts
       it "evicts an expired environment" do
         service = ReplayExpirationService.new
 
-        # The `Cached#clear_all_expired` method tries to optimize the case where
-        # no entries are expired. But if `Time.now < @next_expiration` and there is
-        # an expired entry, then the `service#expired?` method is called twice.
-        expect(service).to receive(:expired?).twice.and_return(true)
+        expect(service).to receive(:expired?).and_return(true)
 
         with_environment_loaded(service) do |cached|
           cached.get!(:an_environment)
@@ -706,8 +703,7 @@ config_version=$vardir/random/scripts
       it "evicts a recently touched environment" do
         Puppet[:environment_timeout] = 60
 
-        # see note above about "twice"
-        expect(service).to receive(:expired?).twice.and_return(true)
+        expect(service).to receive(:expired?).and_return(true)
 
         with_environment_loaded(service) do |cached|
           # even though the environment was recently touched, it's been expired
