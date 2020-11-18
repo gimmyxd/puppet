@@ -1,5 +1,49 @@
 # Utility methods for interacting with POSIX objects; mostly user and group
 module Puppet::Util::POSIX
+  require 'ffi'
+  module GrpLibC
+    extend FFI::Library
+    ffi_lib FFI::Library::LIBC
+    begin
+      attach_function :getgrouplist, [:string, :int, :pointer, :pointer], :int
+    rescue FFI::NotFoundError => e
+      puts e.message
+    end
+
+    def self.user_groups(user)
+      gid = Puppet::Etc.getpwnam(user).gid
+      ngroups_ptr = FFI::MemoryPointer.new(:int)
+      ngroups = 16
+      ngroups_ptr.write_int(ngroups)
+      groups_ptr = FFI::MemoryPointer.new(:uint, ngroups)
+
+      # getgrouplist updates ngroups_ptr to num required.
+      ret = GrpLibC.getgrouplist(user, gid, groups_ptr, ngroups_ptr)
+
+      # # FIXME: some systems (like Darwin) have a bug where they
+      # # never increase ngroups_ptr
+      # while ret < 0
+      #   if (ngroups == ngroups_ptr.get_int(0))
+      #     ngroups *= 2;
+      #     ngroups_ptr.write_int(ngroups)
+      #   end
+      #   groups_ptr.free if groups_ptr
+      #   groups_ptr = FFI::MemoryPointer.new(:uint, ngroups_ptr.get_int(0))
+      #   ret = GrpLibC.getgrouplist(user, gid, groups_ptr, ngroups_ptr)
+      # end
+      if ret < 0
+        groups_ptr.free if groups_ptr
+        groups_ptr = FFI::MemoryPointer.new(:uint, ngroups_ptr.get_int(0))
+        ret = GrpLibC.getgrouplist(user, gid, groups_ptr, ngroups_ptr)
+      end
+
+      if ret >= 0
+        gids = groups_ptr.get_array_of_uint(0, ngroups_ptr.get_int(0))
+        # by Puppet definition, primary group should not be listed
+        gids.reject { |g| g == gid }.map { |g| Puppet::Etc.getgrgid(g).name }
+      end
+    end
+  end
 
   # This is a list of environment variables that we will set when we want to override the POSIX locale
   LOCALE_ENV_VARS = ['LANG', 'LC_ALL', 'LC_MESSAGES', 'LANGUAGE',
@@ -12,11 +56,17 @@ module Puppet::Util::POSIX
   class << self
     # Returns an array of all the groups that the user's a member of.
     def groups_of(user)
-      groups = []
-      Puppet::Etc.group do |group|
-        groups << group.name if group.mem.include?(user)
+      begin
+        groups = GrpLibC.user_groups(user)
+      rescue => e
+        Puppet.debug e.message
+        Puppet.debug 'fallback to Puppet::Etc.group'
+        groups = []
+        Puppet::Etc.group do |group|
+          groups << group.name if group.mem.include?(user)
+        end
       end
-  
+
       uniq_groups = groups.uniq
       if uniq_groups != groups
         Puppet.debug(_('Removing any duplicate group entries'))
@@ -46,7 +96,8 @@ module Puppet::Util::POSIX
 
     begin
       return Etc.send(method, id).send(field)
-    rescue NoMethodError, ArgumentError
+    rescue NoMethodError, ArgumentError => e
+      Puppet.debug("Etc.#{method} failed, called with id: #{id}, for field: #{field}, error: #{e.class}: #{e.message}")
       # ignore it; we couldn't find the object
       return nil
     end
@@ -125,7 +176,7 @@ module Puppet::Util::POSIX
 
   private
 
-  # Get the specified id_field of a given field (user or group), 
+  # Get the specified id_field of a given field (user or group),
   # whether an ID name is provided
   def get_posix_value(location, id_field, field)
     begin
@@ -144,8 +195,17 @@ module Puppet::Util::POSIX
       name = get_posix_field(location, :name, id)
       check_value = name
     end
+
     if check_value != field
-      return search_posix_field(location, id_field, field)
+      check_value_id = get_posix_field(location, id_field, check_value)
+
+      if id == check_value_id
+        Puppet.debug("Multiple entries found for resource: '#{location}' with #{id_field}: #{id}")
+        return id
+      else
+        Puppet.debug("The value retrieved: '#{check_value}' is different than the required state: '#{field}', fallback to search in all groups")
+        return search_posix_field(location, id_field, field)
+      end
     else
       return id
     end
