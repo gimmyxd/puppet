@@ -54,7 +54,7 @@ jobs:
           bundle --version
 
           # Run tests
-          bundle exec rake parallel:spec[2]
+          bundle exec ruby -d -S bundle exec rake parallel:spec[2]
 
       - name: Run tests on Linux
         if: runner.os == 'Linux'
