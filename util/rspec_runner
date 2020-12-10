@@ -40,8 +40,13 @@ module Parallel
       end
 
       def run
-        @options = ::RSpec::Core::ConfigurationOptions.new(@options)
-        ::RSpec::Core::Runner.new(@options).run($stderr, $stdout)
+        begin
+          @options = ::RSpec::Core::ConfigurationOptions.new(@options)
+          ::RSpec::Core::Runner.new(@options).run($stderr, $stdout)
+        rescue => e
+          puts "rspec_runner failed"
+          puts e.message
+          puts e.inspect
       end
     end
   end
