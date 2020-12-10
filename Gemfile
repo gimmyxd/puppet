@@ -50,12 +50,14 @@ group(:test) do
   gem 'rubocop-i18n', '~> 1.2.0', require: false, platforms: [:ruby]
 end
 
+gem 'ruby-prof', '>= 0.16.0'
+
 group(:development, optional: true) do
   gem 'memory_profiler', require: false, platforms: [:mri]
   gem 'pry', require: false, platforms: [:ruby]
   gem "racc", "1.4.9", require: false, platforms: [:ruby]
   if RUBY_PLATFORM != 'java'
-    gem 'ruby-prof', '>= 0.16.0', require: false
+
   end
 end
 

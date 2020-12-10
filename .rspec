@@ -1,2 +1,5 @@
 -b
 --format documentation
+--failure-exit-code 17
+--error-exit-code 18
+-p
