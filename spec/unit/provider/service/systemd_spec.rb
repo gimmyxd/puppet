@@ -6,6 +6,7 @@ describe 'Puppet::Type::Service::Provider::Systemd',
   let(:provider_class) { Puppet::Type.type(:service).provider(:systemd) }
 
   before :each do
+    @a = "test"
     allow(Puppet::Type.type(:service)).to receive(:defaultprovider).and_return(provider_class)
     allow(provider_class).to receive(:which).with('systemctl').and_return('/bin/systemctl')
   end
