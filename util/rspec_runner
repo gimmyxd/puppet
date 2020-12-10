@@ -43,7 +43,7 @@ module Parallel
         begin
           @options = ::RSpec::Core::ConfigurationOptions.new(@options)
           ::RSpec::Core::Runner.new(@options).run($stderr, $stdout)
-        rescue => e
+        rescue Exception => e
           puts "rspec_runner failed"
           puts e.message
           puts e.inspect

@@ -410,9 +410,14 @@ else
 
       process_count = [(args[:process_count] || Facter.value("processorcount")).to_i, 1].max
       group_size = [(args[:group_size] || DEFAULT_GROUP_SIZE).to_i, 1].max
-
-      result =  Parallel::RSpec::Parallelizer.new(process_count, group_size, color_output?, args.extras).run
-      puts "run_result: #{result.inspect}"
+      begin
+        result =  Parallel::RSpec::Parallelizer.new(process_count, group_size, color_output?, args.extras).run
+        puts "run_result: #{result.inspect}"
+      rescue Exception => e
+        puts  "exception in rake"
+        puts e.message
+        puts e.inspect
+      end
     end
   end
 end
