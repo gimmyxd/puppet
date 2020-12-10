@@ -251,7 +251,10 @@ else
 
                 # Spawn the worker process with redirected output
                 options_string = options ? options.join(' ') : ''
+                puts "ruby util/rspec_runner #{group} #{options_string}"
+                puts File.read(group)
                 io = IO.popen("ruby util/rspec_runner #{group} #{options_string}")
+                puts io.inspect
                 pids[thread_id] = io.pid
 
                 # TODO: make the buffer pluggable to handle other output formats like documentation
@@ -269,6 +272,7 @@ else
                 if interrupted
                   begin
                     Process.kill(:SIGKILL, pids[thread_id])
+                    puts 'interrupted'
                   rescue Errno::ESRCH
                   end
                 end
@@ -278,6 +282,8 @@ else
                 io.close
                 pids[thread_id] = nil
                 mutex.synchronize do
+                  puts "result: #{result}"
+                  puts "buffer: #{buffer.inspect}"
                   buffers << buffer
                   success &= result
                 end
@@ -287,6 +293,7 @@ else
 
           # Join all worker threads
           worker_threads.each do |thread|
+            puts "thread: #{thread.inspect}"
             thread.join
           end
 
