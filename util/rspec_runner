@@ -47,6 +47,7 @@ module Parallel
           puts "rspec_runner failed"
           puts e.message
           puts e.inspect
+        end
       end
     end
   end
